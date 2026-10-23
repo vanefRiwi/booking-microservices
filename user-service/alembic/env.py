@@ -11,8 +11,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+from app.src.infrastructure.config import normalize_database_url
+
 #import the models to ensure they are registered with SQLAlchemy's metadata
-from app.src.domain.models.user_model import User
+from app.src.infrastructure.persistence.models import UserModel  # noqa: F401
 
 
 
@@ -30,6 +32,14 @@ if config.config_file_name is not None:
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 target_metadata = SQLModel.metadata
+
+
+def include_object(object, name, type_, reflected, compare_to):
+    # Solo las tablas de este servicio (prefijo usr_). En desarrollo varios servicios
+    # pueden compartir la base de Neon y autogenerate no debe tocar tablas ajenas.
+    if type_ == "table":
+        return name.startswith("usr_")
+    return True
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
@@ -49,12 +59,13 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = config.get_main_option("sqlalchemy.url", os.getenv("DATABASE_URL"))
+    url = normalize_database_url(os.getenv("DATABASE_URL") or config.get_main_option("sqlalchemy.url"))
     context.configure(
         url=url,
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        include_object=include_object,
     )
 
     with context.begin_transaction():
@@ -75,7 +86,7 @@ def run_migrations_online() -> None:
             )
     connectable = engine_from_config(
         {
-            "sqlalchemy.url": database_url
+            "sqlalchemy.url": normalize_database_url(database_url)
          
          },
         prefix="sqlalchemy.",
@@ -84,7 +95,7 @@ def run_migrations_online() -> None:
 
     with connectable.connect() as connection:
         context.configure(
-            connection=connection, target_metadata=target_metadata
+            connection=connection, target_metadata=target_metadata, include_object=include_object
         )
 
         with context.begin_transaction():

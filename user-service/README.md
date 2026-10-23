@@ -169,3 +169,26 @@ uv run alembic upgrade head
 ```
 
 *¡Listo! Puedes ingresar a tu consola de Neon para verificar que tanto la tabla de control de Alembic como tu tabla `usr_users` se hayan creado con la estructura correcta.*
+
+---
+
+## Estructura actual (Clean Architecture)
+
+El modelo SQLModel se movió de `domain/models/user_model.py` a
+`infrastructure/persistence/models.py`: el dominio ya no depende de SQLModel. La tabla
+`usr_users` no cambia y las migraciones existentes siguen siendo válidas.
+
+```text
+app/src/
+├── domain/entities/user.py                 # Entidad User (Python puro) e invariantes
+├── application/                            # Puerto UserRepository y casos de uso
+├── infrastructure/persistence/             # UserModel (SQLModel) + repositorio
+└── presentation/api/v1/users_router.py     # /api/v1/users
+```
+
+```bash
+uv sync
+uv run alembic upgrade head
+uv run fastapi dev main.py --port 8001     # docs en http://localhost:8001/docs
+uv run pytest
+```

@@ -1,7 +1,7 @@
 [project]
 name = "user-service"
 version = "0.1.0"
-description = "Add your description here"
+description = "Microservicio de usuarios: identidad y perfiles"
 readme = "README.md"
 authors = [
     { name = "vreniz", email = "vreniz@uninorte.edu.co" }
@@ -15,5 +15,13 @@ dependencies = [
     "python-dotenv>=1.2.4",
     "sqlmodel>=0.0.48",
 ]
+[dependency-groups]
+dev = [
+    "pytest>=8.4",
+]
+
 [tool.uv]
 package = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
