@@ -1,17 +1,28 @@
 [project]
 name = "booking-service"
 version = "0.1.0"
-description = "Add your description here"
+description = "Microservicio de reservas: reglas de reserva, detección de conflictos y estados"
 readme = "README.md"
 authors = [
     { name = "vreniz", email = "vreniz@uninorte.edu.co" }
 ]
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "alembic>=1.20.0",
+    "fastapi[standard]>=0.156.8",
+    "psycopg>=3.3.6",
+    "psycopg-binary>=3.3.6",
+    "python-dotenv>=1.2.4",
+    "sqlmodel>=0.0.48",
+]
 
-[project.scripts]
-booking-service = "booking_service:main"
+[dependency-groups]
+dev = [
+    "pytest>=8.4",
+]
 
-[build-system]
-requires = ["uv_build>=0.12.17,<0.13.0"]
-build-backend = "uv_build"
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
